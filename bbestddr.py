@@ -2,22 +2,22 @@ import asyncio
 import requests
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import os  # Встроенная библиотека для доступа к переменным системы
-from dotenv import load_dotenv  # Функция, которая загрузит данные из файла .env
+import os  # Встр библка для доступа к переменным сисмы
+from dotenv import load_dotenv  # Функция загрузит данные из файла .env
 
-# 1. Загружаем токен и айди из файла .env в память программы
+#  Загружаем токен и айди из файла .env в память программы
 load_dotenv()
 
-#  Достаем значения по их именам (os.getenv = "получить из окружения")
+# Достаем значения по их именам (os.getenv = "получить из окружения")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
 
-# Ссылка с фильтрами: ОЗУ, от 4 ГБ, сортировка по возрастанию цены
+# Ссылка с фильтрами: ОЗУ, от 4 ГБ, сортировка по возр цены
 URL = "https://catalog.onliner.by/sdapi/catalog.api/search/dram?order=price%3Aasc&volume_dram%5Bfrom%5D=4gb"
 
 
-# 2. ФУНКЦИЯ ПОИСКА САМОЙ ДЕШЕВОЙ ОЗУ
+#  фя ищем самую дешев озу
 def get_cheapest_ram():
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -34,39 +34,39 @@ def get_cheapest_ram():
     for item in products:
         prices = item.get("prices")
         
-        # Проверяем: если у товара есть блок prices и указана минимальная цена (значит, он в наличии!)
+        # Проверяем: если у товара есть блок prices и указана минимальная цена (значит он в наличии)
         if prices and prices.get("price_min"):
             name = item.get("full_name")
             link = item.get("html_url")
             price = prices["price_min"]["amount"]
             currency = prices["price_min"]["currency"]
             
-            # Как только нашли первый доступный товар — сразу возвращаем результат и выходим из функции
+            # Как только нашли первый доступный товар - сразу возвращаем результат и выходим из функции
             return (
-                f" <b>Самая дешевая ОЗУ (от 4 ГБ):</b>\n\n"
-                f" <b>Модель:</b> {name}\n"
-                f" <b>Цена:</b> {price} {currency}\n"
+                f" Самая дешевая ОЗУ (от 4 ГБ):\n\n"
+                f" Модель: {name}\n"
+                f" Цена: {price} {currency}\n"
                 f" <a href='{link}'>Открыть на Onliner</a>"
             )
             
-    return "К сожалению, подходящих товаров в наличии не найдено."
+    return "Подходящих товаров в наличии не найдено."
 
 
-# 3. ФУНКЦИЯ ОТПРАВКИ СООБЩЕНИЯ
+# фя отправки соо
 async def send_daily_message(bot: Bot):
     text = get_cheapest_ram()
-    # Используем parse_mode="HTML", чтобы работали теги <b> (жирный) и <a href> (ссылка)
+    # Используем parse_mode="HTML", чтобы работало <a href> (ссылка)
     await bot.send_message(chat_id=CHAT_ID, text=text, parse_mode="HTML")
 
 
-# 4. ЗАПУСК ПРОГРАММЫ ПО РАСПИСАНИЮ
+# запуск по расписанию
 async def main():
     bot = Bot(token=BOT_TOKEN)
     
-    # Настраиваем таймер по минскому времени
+    # Настройка таймер по минск вр
     scheduler = AsyncIOScheduler(timezone="Europe/Minsk")
     
-    # Ставим будильник на 17:00 каждый день
+    # Ставим будильник на каждый день
     scheduler.add_job(send_daily_message, trigger="cron", hour=22, minute=1, kwargs={"bot": bot})
     scheduler.start()
     
@@ -78,4 +78,5 @@ async def main():
 
 
 if __name__ == "__main__":
+
     asyncio.run(main())
