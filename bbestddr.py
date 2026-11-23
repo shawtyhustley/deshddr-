@@ -43,7 +43,7 @@ def get_cheapest_ram():
             
             # Как только нашли первый доступный товар - сразу возвращаем результат и выходим из функции
             return (
-                f" Самая дешевая ОЗУ (от 4 ГБ):\n\n"
+                f" Самая дешевая ОЗУ (от 4 ГБ):\n"
                 f" Модель: {name}\n"
                 f" Цена: {price} {currency}\n"
                 f" <a href='{link}'>Открыть на Onliner</a>"
@@ -67,10 +67,10 @@ async def main():
     scheduler = AsyncIOScheduler(timezone="Europe/Minsk")
     
     # Ставим будильник на каждый день
-    scheduler.add_job(send_daily_message, trigger="cron", hour=22, minute=1, kwargs={"bot": bot})
+    scheduler.add_job(send_daily_message, trigger="cron", hour=22, minute=41, kwargs={"bot": bot})
     scheduler.start()
     
-    print("Бот запущен! Ожидаю 22:01...")
+    print("Бот запущен! Ожидаю 22:41...")
     
     # Не даем скрипту завершиться
     while True:
@@ -80,3 +80,4 @@ async def main():
 if __name__ == "__main__":
 
     asyncio.run(main())
+
